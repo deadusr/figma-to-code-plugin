@@ -1,6 +1,8 @@
 import { concat } from "lodash"
 import { ColorInfo } from "../../tags/index"
 import { RGBAToHexA } from "../../../utils/colors"
+import getBackgrounds from "../common/index"
+import { valueToTailwindValue } from "../defaultConfig"
 
 const UNTIS = {
     "PIXELS": "px",
@@ -50,32 +52,77 @@ type TextNodeProps = {
 }
 
 
+type ReturnType = {
+    className: string;
+    assets: {
+        colors: ColorInfo[];
+        styles: string
+    };
+}
 
-const generateStylesFromTextNode = async (node: TextNodeProps) => {
-    const [colors, colorVariables] = await getColors(node);
+const generateStylesFromTextNode = async (node: TextNode): Promise<ReturnType> => {
+    const [, colorVariables] = await getColors(node);
+    const styles: string[] = [];
+    const classes: string[] = []
 
-    const fontName = node.fontName === figma.mixed ? "" : `font-[${node.fontName.family}] `;
-    const fontStyle = node.fontName === figma.mixed || node.fontName.style.toLowerCase() !== "italic" ? "" : `italic `;
-    const fontSize = node.fontSize === figma.mixed ? "" : `text-[${node.fontSize}px] `;
-    const fontWeight = node.fontWeight === figma.mixed ? "" : `font-[${node.fontWeight}] `;
-    const letterSpacing = node.letterSpacing === figma.mixed ? "" : `tracking-[${node.letterSpacing.value} ${UNTIS[node.letterSpacing.unit]}] `
-    const lineHeight = node.lineHeight === figma.mixed || node.lineHeight.unit === "AUTO" ? "" : `leading-[${node.lineHeight.value} ${UNTIS[node.lineHeight.unit]}] `
+    if (node.fontName !== figma.mixed) {
+        classes.push(`font-[${node.fontName.family}]`);
+    }
+    if (node.fontName !== figma.mixed && node.fontName.style.toLowerCase() === "italic") {
+        classes.push('italic')
+    }
+    if (node.fontSize !== figma.mixed) {
+        const size = valueToTailwindValue(node.fontSize, 'text', 'text')
+        classes.push(size);
+    }
+    if (node.fontWeight !== figma.mixed) {
+        const weight = valueToTailwindValue(node.fontWeight, 'weight', 'font')
+        classes.push(weight);
+    }
+    if (node.letterSpacing !== figma.mixed) {
+        const letterSpacing = `tracking-[${node.letterSpacing.value}_${UNTIS[node.letterSpacing.unit]}]`;
+        classes.push(letterSpacing);
+    }
+    if (node.lineHeight !== figma.mixed && node.lineHeight.unit !== "AUTO") {
+        const lineHeight = `leading-[${node.lineHeight.value}_${UNTIS[node.lineHeight.unit]}]`;
+        classes.push(lineHeight);
+    }
+    if (node.textCase !== figma.mixed && node.textCase !== "ORIGINAL") {
+        const textCase = `${TEXT_TRANSFORM[node.textCase]}`;
+        classes.push(textCase);
+    }
+    if (node.textDecoration !== figma.mixed) {
+        const textDecoration = `${TEXT_DECORATION[node.textDecoration]}`;
+        classes.push(textDecoration);
+    }
+    if (node.textDecorationColor !== figma.mixed && node.textDecorationColor !== null && node.textDecorationColor.value !== "AUTO") {
+        const textDecorationColor = valueToTailwindValue(node.textDecorationColor.value.color, 'color', 'decoration');
+        classes.push(textDecorationColor);
+    }
+    if (node.textDecorationStyle !== figma.mixed && node.textDecorationStyle !== null) {
+        const textDecorationStyle = `${TEXT_DECORATION_STYLE[node.textDecorationStyle]}`;
+        classes.push(textDecorationStyle);
+    }
+    if (node.textDecorationThickness !== figma.mixed && node.textDecorationThickness !== null && node.textDecorationThickness.unit !== "AUTO") {
+        const textDecorationThickness = `decoration-[${node.textDecorationThickness.value} ${UNTIS[node.textDecorationThickness.unit]}]`;
+        classes.push(textDecorationThickness);
+    }
 
-    const textCase = node.textCase === figma.mixed ? "" : `${TEXT_TRANSFORM[node.textCase]} `;
-    const textDecoration = node.textDecoration === figma.mixed ? "" : `${TEXT_DECORATION[node.textDecoration]} `;
 
-    const textDecorationColor = node.textDecorationColor === figma.mixed || node.textDecorationColor === null || node.textDecorationColor.value === "AUTO" ? "" : `${node.textDecorationColor.value} ` // TODO bound variables for textDecorationColor
-    const textDecorationStyle = node.textDecorationStyle === figma.mixed || node.textDecorationStyle === null ? "" : `${TEXT_DECORATION_STYLE[node.textDecorationStyle]} `
-    const textDecorationThickness = node.textDecorationThickness === figma.mixed || node.textDecorationThickness === null || node.textDecorationThickness.unit === "AUTO" ? "" : `decoration-[${node.textDecorationThickness.value} ${UNTIS[node.textDecorationThickness.unit]}] `;
+    const [bgClasses, bgStyles] = await getBackgrounds(node);
+    if (bgClasses)
+        if (bgStyles.length !== 0)
+            styles.push(bgStyles);
 
-    const fontColor = concat(colorVariables.map(variable => `text-${variable.name} `), colors.map(color => `text-[${color}] `)).join('');
+    classes.push(bgClasses);
 
+    const className = classes.filter(el => el.trim().length !== 0).join(' ');
 
-    let className = `${fontName}${fontStyle}${fontSize}${fontWeight}${letterSpacing}${lineHeight}${textCase}${textDecoration}${textDecorationColor}${textDecorationStyle}${textDecorationThickness}${fontColor}`;
     return {
         className,
         assets: {
-            colors: colorVariables
+            colors: colorVariables,
+            styles: styles.join('\n')
         }
     };
 }

@@ -1,8 +1,9 @@
 import { RGBAToHexA } from "../../../utils/colors";
 import { ColorInfo } from "../../tags/index";
 import { valueToTailwindValue } from "../defaultConfig";
-import { decomposeFigmaTransform, transformToRotation } from "../../../utils/transform";
+
 import { isMinusZero } from "../../../utils/common";
+import getBackgrounds from "../common/index";
 
 
 const JUSTIFY_CLASSES = {
@@ -26,9 +27,19 @@ const ALIGN_CONTENT = {
     "AUTO": "",
 }
 
-const generateStylesFromFrame = async (node: FrameNode) => {
-    const [colors, colorVariables] = await getColors(node);
+
+type ReturnType = {
+    className: string;
+    assets: {
+        colors: ColorInfo[];
+        styles: string
+    };
+}
+
+const generateStylesFromFrame = async (node: FrameNode): Promise<ReturnType> => {
+    const [, colorVariables] = await getColors(node);
     const classes: string[] = []
+    const styles: string[] = [];
 
     const parentFlex = node.parent && 'layoutMode' in node.parent && node.parent.layoutMode !== "NONE";
     const absolutePos = node.layoutPositioning === "ABSOLUTE";
@@ -139,8 +150,11 @@ const generateStylesFromFrame = async (node: FrameNode) => {
 
 
 
-    const bg = await getBackgrounds(node);
-    classes.push(bg);
+    const [bgClasses, bgStyles] = await getBackgrounds(node);
+    if (bgStyles.length !== 0)
+        styles.push(bgStyles);
+
+    classes.push(bgClasses);
 
     const hasBorder = node.strokes.length > 0;
 
@@ -186,89 +200,11 @@ const generateStylesFromFrame = async (node: FrameNode) => {
     return {
         className,
         assets: {
-            colors: colorVariables
+            colors: colorVariables,
+            styles: styles.join('\n')
         }
     }
 
-}
-
-
-const GRADIENT_CLASSES = {
-    "GRADIENT_ANGULAR": "bg-conic",
-    "GRADIENT_LINEAR": "bg-linear",
-    "GRADIENT_RADIAL": "bg-radial",
-}
-
-const getBackgrounds = async (node: FrameNode) => {
-    let classes: string[] = [];
-    if (node.fills === figma.mixed) return ``;
-
-
-    if (node.fills.length === 1) {
-        const fill = node.fills[0];
-
-        switch (fill.type) {
-            case 'GRADIENT_ANGULAR':
-            case 'GRADIENT_LINEAR':
-                const rotationAngle = transformToRotation(fill.gradientTransform);
-
-                const leftPos = fill.gradientTransform[0][2];
-                const topPos = fill.gradientTransform[1][2];
-                const isGradientComplex = leftPos !== 0 || topPos !== 1 || fill.gradientStops.length > 3;
-                if (isGradientComplex) {
-                    console.log((await node.getCSSAsync()).background); // TODO css generation
-                    break;
-                }
-
-                const gradientType = GRADIENT_CLASSES[fill.type];
-                classes.push(`${gradientType}-${rotationAngle}/srgb`)
-
-                const colorStops = fill.gradientStops.sort((prev, next) => prev.position - next.position) as readonly ColorStop[];
-
-                const fromColorStop = colorStops[0];
-                const fromColor = valueToTailwindValue(fromColorStop.color, "color", 'from');
-                const fromPosition = fromColorStop.position !== 0 ? `from-${fromColorStop.position * 100}%` : "";
-                classes.push(fromColor)
-                classes.push(fromPosition)
-
-                const hasVia = colorStops.length === 3;
-
-                if (hasVia) {
-                    const viaColorStop = colorStops[1];
-                    const viaColor = viaColorStop !== undefined ? valueToTailwindValue(viaColorStop.color, "color", "via") : "";
-                    const viaPosition = `via-${viaColorStop.position * 100}%`;
-                    classes.push(viaColor);
-                    classes.push(viaPosition);
-                }
-
-                const toColorStop = (hasVia ? colorStops[2] : colorStops[1]);
-
-                const toColor = toColorStop !== undefined ? valueToTailwindValue(toColorStop.color, "color", "to") : "";
-                const toPosition = toColorStop !== undefined && toColorStop.position !== 1 ? `to-${toColorStop.position * 100}%` : "";
-                classes.push(toColor)
-                classes.push(toPosition)
-                break;
-
-
-            case 'GRADIENT_DIAMOND':
-            case 'GRADIENT_RADIAL':
-                console.log((await node.getCSSAsync()).background); // TODO css generation
-                break;
-
-            case 'SOLID':
-                const color = valueToTailwindValue(fill.color as RGBA, "color", "bg")
-                classes.push(color);
-                break;
-
-        }
-    } else {
-        console.log((await node.getCSSAsync()).background); // TODO css generation
-    }
-
-
-
-
-    return classes.map(el => el.trim()).filter(el => el.length !== 0).join(' ');
 }
 
 

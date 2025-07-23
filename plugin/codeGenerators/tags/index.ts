@@ -31,6 +31,7 @@ type BaseData = {
 export type TagBasedData = BaseData & {
     tag: Tags; // 'tag' is REQUIRED here
     className: string;
+    styles: string,
     tagProps: { name: string; value: string }[];
     content?: string | null;
     children?: TagData[]; // The type can be recursive
@@ -41,6 +42,7 @@ export type HtmlBasedData = BaseData & {
     html: string;      // 'html' is REQUIRED here
     tag?: never;       // 'tag' and its related props are FORBIDDEN
     className?: never;
+    styles?: never,
     tagProps?: never;
     content?: never;
     children?: never;
@@ -130,6 +132,7 @@ const generateTagFromNode = (node: SceneNode, userTag: Tags | null): PartialResu
                             return {
                                 tag: userTag || 'div',
                                 className,
+                                styles: assets.styles,
                                 tagProps: [],
                                 images: [],
                                 colors: assets.colors,
@@ -159,6 +162,7 @@ const generateTagFromNode = (node: SceneNode, userTag: Tags | null): PartialResu
                             return {
                                 tag: userTag || 'img',
                                 className,
+                                styles: '',
                                 tagProps: [{ name: 'src', value: src }],
                                 images: [
                                     {
@@ -196,6 +200,7 @@ const generateTagFromNode = (node: SceneNode, userTag: Tags | null): PartialResu
                             return {
                                 tag: userTag || 'div',
                                 className,
+                                styles: '',
                                 tagProps: [],
                                 images: [
                                     {
@@ -260,6 +265,7 @@ const generateTagFromNode = (node: SceneNode, userTag: Tags | null): PartialResu
                                 tagProps: [],
                                 content: segment.characters,
                                 className,
+                                styles: "",
                                 images: [],
                                 colors: assets.colors,
                             })
@@ -271,6 +277,7 @@ const generateTagFromNode = (node: SceneNode, userTag: Tags | null): PartialResu
                             tag: userTag || 'p',
                             tagProps: [],
                             className: className,
+                            styles: '',
                             children,
                             images: [],
                             colors: assets.colors,
@@ -291,7 +298,7 @@ const generateTagFromNode = (node: SceneNode, userTag: Tags | null): PartialResu
                         tag: userTag || 'p',
                         className,
                         tagProps: [],
-                        css: "",
+                        styles: assets.styles,
                         content: node.characters,
                         images: [],
                         colors: assets.colors
@@ -308,10 +315,11 @@ const generateTagFromNode = (node: SceneNode, userTag: Tags | null): PartialResu
                 getDeferredData: async () => {
                     return {
                         tag: userTag || 'div',
-                        className,
+                        className: '',
+                        styles: '',
                         tagProps: [],
-                        css: '',
                         images: [],
+                        colors: [],
                     }
                 }
             }

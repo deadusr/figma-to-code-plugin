@@ -63,14 +63,14 @@ const updateCodeUI = async () => {
     const data = {
         html: result.html,
         assets: result.assets,
-        css: ""
+        css: result.assets.styles
 
     }
     sendMessageToUI('Code.updated', data);
 }
 
 
-const generateCode = async (node: SceneNode): Promise<{ html: string, assets: { images: ImageInfo[], colors: ColorInfo[] } }> => {
+const generateCode = async (node: SceneNode): Promise<{ html: string, assets: { images: ImageInfo[], colors: ColorInfo[], styles: string } }> => {
 
     const userTag = nodesToHtmlTagMap.get(node.id) || null;
     const { initialData: { childrenDisabled }, getDeferredData } = generateTagFromNode(node, userTag);
@@ -81,18 +81,21 @@ const generateCode = async (node: SceneNode): Promise<{ html: string, assets: { 
     if (generateChildren) {
         const children = await Promise.all(node.children.map(generateCode));
         const childrenHtml = children.map(el => el.html).join('\n')
+        const childrenStyles = children.map(el => el.assets.styles).join('\n');
         const childrenColors = flatten(children.map(el => el.assets.colors));
         const childrenImages = flatten(children.map(el => el.assets.images));
 
         const html = generateHtml(tagData, childrenHtml);
         const rootImages = generateImages(tagData);
         const colors = concat(generateColors(tagData), childrenColors);
+        const styles = [childrenStyles, tagData.styles].filter(el => !!el).join('\n');
 
         return {
             html,
             assets: {
                 images: concat(childrenImages, rootImages),
-                colors
+                colors,
+                styles
             }
         }
     }
@@ -101,12 +104,14 @@ const generateCode = async (node: SceneNode): Promise<{ html: string, assets: { 
     const html = generateHtml(tagData);
     const images = generateImages(tagData);
     const colors = generateColors(tagData);
+    const styles = tagData.styles || "";
 
     return {
         html,
         assets: {
             images,
-            colors
+            colors,
+            styles
         }
     }
 }

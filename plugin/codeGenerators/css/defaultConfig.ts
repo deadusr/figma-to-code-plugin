@@ -34,9 +34,30 @@ const DefaultStyleConfig = {
     ]),
 
     text: new Map([
-        [16, "sm"],
-        [18, "md"],
-        [20, "lg"],
+        [12, 'xs'],
+        [14, 'sm'],
+        [16, "base"],
+        [18, "lg"],
+        [20, "xl"],
+        [24, "2xl"],
+        [30, "3xl"],
+        [36, "4xl"],
+        [48, "5xl"],
+        [72, "7xl"],
+        [96, "8xl"],
+        [128, "9xl"],
+    ]),
+
+    weight: new Map([
+        [100, 'thin'],
+        [200, 'extralight'],
+        [300, 'light'],
+        [400, 'normal'],
+        [500, 'medium'],
+        [600, 'semibold'],
+        [700, 'bold'],
+        [800, 'extrabold'],
+        [900, 'black'],
     ]),
 
 
@@ -70,7 +91,7 @@ const DefaultStyleConfig = {
 
 type Key = keyof typeof DefaultStyleConfig | "border" | "rotate";
 
-export const valueToTailwindValue = (value: number | RGBA, name: Key, prefix?: string): string => {
+export const valueToTailwindValue = (value: number | RGB, name: Key, prefix?: string): string => {
     let result = "";
     if (value === 0) return result;
 
@@ -82,7 +103,7 @@ export const valueToTailwindValue = (value: number | RGBA, name: Key, prefix?: s
             return prefix ? `${valueNegitive ? "-" : ""}${prefix}-${Math.abs(value as number)}` : value.toString();
 
         case 'color':
-            const hex = RGBAToHexA(value as RGBA);
+            const hex = RGBAToHexA(value as RGB);
             const color = DefaultStyleConfig.color.get(hex);
             return prefix
                 ? color !== undefined
@@ -93,6 +114,7 @@ export const valueToTailwindValue = (value: number | RGBA, name: Key, prefix?: s
         case 'radius':
         case 'spacing':
         case 'text':
+        case 'weight':
             const data = DefaultStyleConfig[name];
             const number = Math.abs(value as number);
             const hasValue = data.has(number);
