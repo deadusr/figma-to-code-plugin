@@ -12,7 +12,7 @@ export type TPageChildren = {
 
 
 export type GeneratedTagType = {
-    tag: Tags,
+    tag: string,
     childrenDisabled: boolean,
 }
 

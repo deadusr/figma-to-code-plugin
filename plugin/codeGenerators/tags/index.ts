@@ -9,6 +9,7 @@ import generateStylesFromImage from "../css/image/imageNodeGenerator";
 import generateStylesFromBgImage from "../css/image/bgImageNodeGenerator";
 import generateStylesFromIcon from "../css/icon/iconNodeGenerator";
 import { addClassToSvgString } from "../../utils/common";
+import { generateProps } from "../components/index";
 
 
 export type ImageInfo = {
@@ -29,10 +30,10 @@ type BaseData = {
 };
 
 export type TagBasedData = BaseData & {
-    tag: Tags; // 'tag' is REQUIRED here
+    tag: string; // 'tag' is REQUIRED here
     className: string;
     styles: string,
-    tagProps: { name: string; value: string }[];
+    tagProps: { name: string; value: string | boolean }[];
     content?: string | null;
     children?: TagData[]; // The type can be recursive
     html?: never;         // 'html' is FORBIDDEN
@@ -77,7 +78,7 @@ const FONT_PROPS = [
 
 
 
-const generateTagFromNode = (node: SceneNode, userTag: Tags | null): PartialResult<GeneratedTagType, TagData> => {
+const generateTagFromNode = async (node: SceneNode, userTag: Tags | null): Promise<PartialResult<GeneratedTagType, TagData>> => {
     const filename = node.name.replace(/\s/g, '');
 
     switch (node.type) {
@@ -112,6 +113,44 @@ const generateTagFromNode = (node: SceneNode, userTag: Tags | null): PartialResu
                     }
                 }
             }
+
+        case 'INSTANCE':
+            let componentName = "";
+            let props: {
+                name: string;
+                value: string | boolean;
+            }[] = [];
+            const mainComponent = await node.getMainComponentAsync();
+            if (mainComponent === null)
+                throw new Error(`Component from instance ${node.name} was not found`);
+
+            if (mainComponent !== null && mainComponent.parent !== null && mainComponent.parent.type === "COMPONENT_SET") {
+                componentName = mainComponent.parent.name;
+            } else {
+                componentName = mainComponent.name;
+            }
+
+            if (mainComponent.variantProperties !== null) {
+                props = generateProps(mainComponent.variantProperties);
+            }
+
+            return {
+                initialData: {
+                    tag: componentName,
+                    childrenDisabled: true,
+                },
+                getDeferredData: async () => {
+                    return {
+                        tag: componentName,
+                        className: "",
+                        styles: "",
+                        tagProps: props,
+                        images: [],
+                        colors: [],
+                    }
+                }
+            }
+
         case 'FRAME':
             const imagePaint = node.fills !== figma.mixed ? node.fills.find(el => el.type === "IMAGE") : undefined;
             const hasImageInside = imagePaint !== undefined && imagePaint.imageHash !== null;

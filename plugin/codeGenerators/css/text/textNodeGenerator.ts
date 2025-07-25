@@ -1,4 +1,3 @@
-import { concat } from "lodash"
 import { ColorInfo } from "../../tags/index"
 import { RGBAToHexA } from "../../../utils/colors"
 import getBackgrounds from "../common/index"

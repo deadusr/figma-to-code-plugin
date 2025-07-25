@@ -49,8 +49,8 @@ const main = async () => {
     })
 }
 
-const updateLayersUI = () => {
-    const children = generateLayers()
+const updateLayersUI = async () => {
+    const children = await generateLayers()
     sendMessageToUI("PageNode.updated", { "children": children })
 }
 
@@ -73,7 +73,7 @@ const updateCodeUI = async () => {
 const generateCode = async (node: SceneNode): Promise<{ html: string, assets: { images: ImageInfo[], colors: ColorInfo[], styles: string } }> => {
 
     const userTag = nodesToHtmlTagMap.get(node.id) || null;
-    const { initialData: { childrenDisabled }, getDeferredData } = generateTagFromNode(node, userTag);
+    const { initialData: { childrenDisabled }, getDeferredData } = await generateTagFromNode(node, userTag);
     const tagData = await getDeferredData();
 
     const generateChildren = !childrenDisabled && 'children' in node;
@@ -144,7 +144,7 @@ const generateHtml = (data: TagData, insideHtml: string = ''): string => {
         ? data.children.map(el => generateHtml(el)).join('\n')
         : '';
 
-    const props = data.tagProps !== undefined ? data.tagProps.map(el => `${el.name}=${el.value}`).join(' ') : "";
+    const props = data.tagProps !== undefined ? data.tagProps.map(el => `${el.name}${el.value === true ? "" : `=${el.value}`}`).join(' ') : "";
 
     const htmlStr =
         `<${data.tag} ${props ? `${props} ` : ""}class="${data.className}">${data.content ? `\n${data.content}` : ""}${insideHtml ? `\n${insideHtml}` : ""}${childsHtml ? `\n${childsHtml}` : ""}\n</${data.tag}>`;
@@ -152,12 +152,14 @@ const generateHtml = (data: TagData, insideHtml: string = ''): string => {
 }
 
 
-const generateLayers = () => {
+const generateLayers = async () => {
     let children: TPageChildren[] = [];
     const nodes = [...figma.currentPage.children].reverse();
-    nodes.forEach(node => {
+    const promises = nodes.map(async node => {
         const hasChildren = 'children' in node && node.children.length !== 0;
         const userTag = nodesToHtmlTagMap.get(node.id) || null;
+        const tag = (await generateTagFromNode(node, userTag)).initialData;
+
 
         children.push({
             id: node.id,
@@ -165,33 +167,37 @@ const generateLayers = () => {
             type: node.type,
             hasChildren,
             parentIds: node.parent ? [node.parent.id] : [],
-
-            tag: generateTagFromNode(node, userTag).initialData
+            tag
         })
 
-        if (hasChildren)
-            generateChildrenTags(node.children, node.id, expandedNodesMap)
-                .forEach(child => {
-                    const parentIds = node.parent ? [node.parent.id] : [];
-                    child.parentIds.forEach(id => parentIds.push(id))
-                    child.parentIds = parentIds;
-                    children.push(child);
-                })
+        if (hasChildren) {
+            const childrenTags = await generateChildrenTags(node.children, node.id, expandedNodesMap);
+            childrenTags.forEach(child => {
+                const parentIds = node.parent ? [node.parent.id] : [];
+                child.parentIds.forEach(id => parentIds.push(id))
+                child.parentIds = parentIds;
+                children.push(child);
+            })
+        }
     })
+
+
+    await Promise.all(promises);
 
     return children;
 }
 
 
-const generateChildrenTags = (children: readonly SceneNode[], rootId: string, expandedNodesMap: Map<string, string[]>): readonly TPageChildren[] => {
+const generateChildrenTags = async (children: readonly SceneNode[], rootId: string, expandedNodesMap: Map<string, string[]>): Promise<readonly TPageChildren[]> => {
     let foundChildren: TPageChildren[] = [];
     const childrenIds = expandedNodesMap.get(rootId);
 
     if (childrenIds === undefined) return [];
 
-    children.forEach(node => {
+    const promises = children.map(async node => {
         const hasChildren = 'children' in node && node.children.length !== 0;
         const userTag = nodesToHtmlTagMap.get(node.id) || null;
+        const tag = (await generateTagFromNode(node, userTag)).initialData;
 
         foundChildren.push({
             id: node.id,
@@ -199,19 +205,22 @@ const generateChildrenTags = (children: readonly SceneNode[], rootId: string, ex
             type: node.type,
             hasChildren,
             parentIds: [rootId],
-
-            tag: generateTagFromNode(node, userTag).initialData
+            tag
         });
 
         if (hasChildren && childrenIds.includes(node.id)) {
-            generateChildrenTags(node.children, node.id, expandedNodesMap).forEach(children => {
+            const children = await generateChildrenTags(node.children, node.id, expandedNodesMap);
+            children.forEach(child => {
                 const parentIds = [rootId];
-                children.parentIds.forEach(id => parentIds.push(id))
-                children.parentIds = parentIds;
-                foundChildren.push(children);
+                child.parentIds.forEach(id => parentIds.push(id))
+                child.parentIds = parentIds;
+                foundChildren.push(child);
             })
         }
     })
+
+
+    await Promise.all(promises);
 
     return foundChildren;
 }
