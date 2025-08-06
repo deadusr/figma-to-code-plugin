@@ -8,6 +8,7 @@ import Images from "./components/images";
 import Instances from "./components/instances";
 import Layers from "./layers/layers"
 import { useCodeStore, useColorsStore, useImagesStore } from "./main";
+import StyleConfig from "./styleconfig";
 
 function App() {
   const { html, css } = useCodeStore();
@@ -17,7 +18,7 @@ function App() {
 
   const images = useMemo(() => imagesData.images.map(({ name, base64Src }) => ({ name: name, src: base64Src })), [imagesData.images])
 
-  const layers = useMemo(() => <Layers/>,[]);
+  const layers = useMemo(() => <Layers />, []);
 
 
   return (
@@ -59,12 +60,8 @@ function App() {
               <Code code={css} />
             </div>
 
-            <div className="group h-5 pl-3 pr-2 py-1 flex justify-between items-center relative">
-              <button onClick={() => {}} className="z-20 absolute left-0 top-0 bottom-0 flex items-center justify-center w-3 h-full outline-none">
-                <Icon className='text-icon-tertiary hidden! group-hover:block!' icon="chevron.down.16" />
-              </button>
-              <span className="text-body-medium text-text">Style configuration</span>
-            </div>
+            <StyleConfig />
+
 
             <div className="h-5 pl-3 pr-2 py-1 flex justify-between items-center">
               <span className="text-body-medium text-text">Components</span>

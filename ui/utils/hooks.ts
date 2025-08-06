@@ -8,3 +8,12 @@ export const useDisclosure = () => {
 
     return [show, open, close] as const;
 }
+
+
+export const useToggle = () => {
+    const [show, setShow] = useState(false);
+
+    const toggle = useCallback(() => setShow(state => !state), [])
+
+    return [show, toggle] as const;
+}
