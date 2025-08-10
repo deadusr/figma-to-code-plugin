@@ -2,7 +2,6 @@ import { RGBAToHexA } from "../../../utils/colors";
 import { ColorInfo } from "../../tags/index";
 import { valueToTailwindValue } from "../defaultConfig";
 
-import { isMinusZero } from "../../../utils/common";
 import getBackgrounds from "../common/index";
 
 
@@ -36,7 +35,7 @@ type ReturnType = {
     };
 }
 
-const generateStylesFromFrame = async (node: FrameNode| ComponentNode| InstanceNode): Promise<ReturnType> => {
+const generateStylesFromFrame = async (node: FrameNode | ComponentNode | InstanceNode): Promise<ReturnType> => {
     const [, colorVariables] = await getColors(node);
     const classes: string[] = []
     const styles: string[] = [];
@@ -208,7 +207,7 @@ const generateStylesFromFrame = async (node: FrameNode| ComponentNode| InstanceN
 
 
 
-const getColors = async (node: FrameNode| ComponentNode| InstanceNode) => {
+const getColors = async (node: FrameNode | ComponentNode | InstanceNode) => {
     const colorVariables: ColorInfo[] = [];
     const colors: string[] = [];
 

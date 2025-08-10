@@ -94,7 +94,7 @@ const getBackgrounds = async (node: FrameNode | TextNode| ComponentNode| Instanc
                 break;
 
         }
-    } else {
+    } else if(node.fills.length > 1) {
         const css = (await node.getCSSAsync()).background;
         const className = `${name}_bg`;
         styles.push({ name: className, value: css });

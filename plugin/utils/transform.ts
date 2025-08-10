@@ -7,7 +7,7 @@ export const transformToRotation = (transform: Transform) => {
     // Adjust for CSS's `linear-gradient` angle system (0deg is 'to top')
     // A standard top-to-bottom Figma gradient is 180deg in CSS.
     let cssAngle = -(angleDeg - 180) % 360;
-    // It's good practice to round the angle
+
     cssAngle = Math.round(cssAngle);
 
     return cssAngle;
