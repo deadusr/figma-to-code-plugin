@@ -103,7 +103,7 @@ const generateTagFromNode = (node: SceneNode, userTag: Tags | null): PartialResu
                         html = html.replace(regex, "currentColor");
 
                         const colorName = `text-${color.name}`;
-                        html = addClassToSvgString(html, `text-${colorName}`)
+                        html = addClassToSvgString(html, colorName)
                     }
 
                     return {

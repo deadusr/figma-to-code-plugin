@@ -83,8 +83,12 @@ const main = async () => {
     }
 
     figma.on("selectionchange", async () => { // TODO think how optimize this update in UI so it wouln't run twice
-        console.log(figma.currentPage.selection[0]);
         const selectedNode = figma.currentPage.selection[0];
+        if (!selectedNode) {
+            sendMessageToUI("Selected.updated", { nodes: [] })
+            updateLayersUI();
+            return;
+        }
         sendMessageToUI("Selected.updated", { nodes: [selectedNode.id] })
         expandNodesToChild(selectedNode);
         updateLayersUI();

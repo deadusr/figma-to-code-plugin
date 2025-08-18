@@ -62,17 +62,6 @@ export const onSetHtmlTagToNode = (nodeId: string, tag: string) => {
   parent.postMessage({ pluginMessage: message }, "*")
 }
 
-export const onGetCode = (nodeId: string) => {
-  const message: MessageToPlugin = {
-    "message": "getCode",
-    "value": {
-      node: nodeId,
-    }
-  }
-  parent.postMessage({ pluginMessage: message }, "*")
-}
-
-
 export const onImportTailwindColors = () => {
   const message: MessageToPlugin = {
     "message": "importTailwindColors",
@@ -114,7 +103,12 @@ onmessage = ({ data }: MessageEvent<{ pluginMessage: MessagesFromPlugin }>) => {
 
     case 'Selected.updated':
       const { setSelectedNode } = usePageSelectionStore.getState();
-      setSelectedNode(value.nodes[0])
+      const selectedNodeId = value.nodes.length > 0 ? value.nodes[0] : null;
+      if (selectedNodeId !== null) {
+        setSelectedNode(selectedNodeId);
+      } else {
+        usePageSelectionStore.setState({ nodeId: null });
+      }
       break;
 
     case 'Code.updated':

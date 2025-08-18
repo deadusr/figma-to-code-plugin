@@ -1,7 +1,7 @@
 import { JSX, useCallback, useEffect, useMemo, useRef } from "react";
 import { TPageChildren } from "../../types";
 import Icon from "../components/icon"
-import { onToggleExpandNode, onSelectNode, usePageChildrenStore, usePageSelectionStore, onSetHtmlTagToNode, onGetCode } from "../main"
+import { onToggleExpandNode, onSelectNode, usePageChildrenStore, usePageSelectionStore, onSetHtmlTagToNode } from "../main"
 import Layer from "./components/layer"
 
 const Layers = () => {
@@ -123,7 +123,7 @@ const LayerComponent = ({ node, onSelect, selected = "none", expanded, container
     }
 
     const onChangeTag = (tag: string) => {
-        onSetHtmlTagToNode(node.id, node.tag.tag);
+        onSetHtmlTagToNode(node.id, tag);
     }
 
     const type = node.isImage ? "IMAGE" : node.type;

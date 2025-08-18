@@ -171,7 +171,7 @@ const generateStylesFromFrame = async (node: FrameNode | ComponentNode | Instanc
         classes.push(borderColor);
 
 
-        const hasDashes = node.dashPattern.filter(el => el !== 0) !== undefined;
+        const hasDashes = node.dashPattern.filter(el => el !== 0).length > 0;
         if (hasDashes) {
             classes.push('border-dashed')
         }
