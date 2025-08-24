@@ -148,7 +148,8 @@ const getColors = async (node: TextNodeProps) => {
             }
         }
 
-        const hex = RGBAToHexA(fill.color);
+
+        const hex = RGBAToHexA({ ...fill.color, a: fill.opacity ?? 1 });
         colors.push(hex);
         return;
     })

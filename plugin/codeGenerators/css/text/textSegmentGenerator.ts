@@ -82,7 +82,7 @@ const generateStylesFromTextSegment = async (segment: TextSegmentProps, parent: 
     const textDecorationStyle = segment.textDecorationStyle === null ? "" : `${TEXT_DECORATION_STYLE[segment.textDecorationStyle]} `
     const textDecorationThickness = segment.textDecorationThickness === null || segment.textDecorationThickness.unit === "AUTO" ? "" : `decoration-[${segment.textDecorationThickness.value} ${UNTIS[segment.textDecorationThickness.unit]}] `;
 
-    const fontColor = concat(colorVariables.map(variable => `text-${variable.name} `), colors.map(color => `text-[${color}] `)).join('');
+    const fontColor = concat(colorVariables.map(variable => `text-${variable.name} `), colors.map(color => `${color} `)).join('');
 
 
     let className = `${fontName}${fontStyle}${fontSize}${fontWeight}${letterSpacing}${lineHeight}${textCase}${textDecoration}${textDecorationColor}${textDecorationStyle}${textDecorationThickness}${fontColor}`;
@@ -114,7 +114,7 @@ const getColors = async (segment: TextSegmentProps, parent: TextNode) => {
             }
         }
 
-        const hex = RGBAToHexA(fill.color);
+        const hex = RGBAToHexA({ ...fill.color, a: fill.opacity ?? 1 });
         colors.push(hex);
         return;
     })

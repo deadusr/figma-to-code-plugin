@@ -92,7 +92,7 @@ const DefaultStyleConfig = {
 
 type Key = keyof typeof DefaultStyleConfig | "border" | "rotate";
 
-export const valueToTailwindValue = (value: number | RGB, name: Key, prefix?: string): string => {
+export const valueToTailwindValue = (value: number | RGB | RGBA, name: Key, prefix?: string): string => {
     let result = "";
     if (value === 0) return result;
 
@@ -104,16 +104,25 @@ export const valueToTailwindValue = (value: number | RGB, name: Key, prefix?: st
             return prefix ? `${valueNegitive ? "-" : ""}${prefix}-${Math.abs(value as number)}` : value.toString();
 
         case 'color':
-            const hex = RGBAToHexA(value as RGB);
+            const baseValue: RGB = { ...(value as RGB) }
+            const opacity = 'a' in (value as RGBA) ? (value as RGBA).a : 1;
+
+            const hex = RGBAToHexA(baseValue);
             const userColor = userColors.colors.get(hex);
             const color = userColor || DefaultStyleConfig.color.get(hex);
 
+            const hasOpacity = opacity !== 1;
+            const opacityModifier = hasOpacity ? `/${Math.round(opacity * 100)}` : '';
+
+            // If color exists in palette: prefix-color/opacity
+            // If color doesn't exist: prefix-[#hex] (where hex includes alpha if a !== 1)
+            const fullHex = RGBAToHexA(value as RGBA);
 
             return prefix
                 ? color !== undefined
-                    ? `${prefix}-${color}`
-                    : `${prefix}-[${hex}]`
-                : color || hex;
+                    ? `${prefix}-${color}${opacityModifier}`
+                    : `${prefix}-[${fullHex}]`
+                : color ? `${color}${opacityModifier}` : fullHex;
 
         case 'radius':
         case 'spacing':

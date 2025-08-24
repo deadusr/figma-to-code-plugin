@@ -167,7 +167,7 @@ const generateStylesFromFrame = async (node: FrameNode | ComponentNode | Instanc
             classes.push(borderWidth)
         }
 
-        const borderColor = node.strokes[0].type === "SOLID" ? `border-[${RGBAToHexA(node.strokes[0].color)}]` : "";
+        const borderColor = node.strokes[0].type === "SOLID" ? valueToTailwindValue({ ...node.strokes[0].color, a: node.strokes[0].opacity ?? 1 }, "color", "border") : "";
         classes.push(borderColor);
 
 
@@ -228,7 +228,7 @@ const getColors = async (node: FrameNode | ComponentNode | InstanceNode) => {
             }
         }
 
-        const hex = RGBAToHexA(fill.color);
+        const hex = RGBAToHexA({ ...fill.color, a: fill.opacity ?? 1 });
         colors.push(hex);
         return;
     })

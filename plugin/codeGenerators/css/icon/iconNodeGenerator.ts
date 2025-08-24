@@ -52,7 +52,7 @@ const getColors = async (node: FrameNode) => {
             }
         }
 
-        const hex = RGBAToHexA(fill.color);
+        const hex = RGBAToHexA({ ...fill.color, a: fill.opacity ?? 1 });
         colors.push(hex);
         return;
     })

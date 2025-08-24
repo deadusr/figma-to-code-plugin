@@ -8,7 +8,7 @@ const GRADIENT_CLASSES = {
     "GRADIENT_RADIAL": "bg-radial",
 }
 
-const getBackgrounds = async (node: FrameNode | TextNode| ComponentNode| InstanceNode): Promise<[string, string]> => {
+const getBackgrounds = async (node: FrameNode | TextNode | ComponentNode | InstanceNode): Promise<[string, string]> => {
     if (node.fills === figma.mixed) return ['', ''];
 
     const isText = node.type === "TEXT";
@@ -89,12 +89,12 @@ const getBackgrounds = async (node: FrameNode | TextNode| ComponentNode| Instanc
                 break;
 
             case 'SOLID':
-                const color = valueToTailwindValue(fill.color as RGBA, "color", isText ? "text" : "bg")
+                const color = valueToTailwindValue({ ...fill.color, a: fill.opacity ?? 1 } as RGBA, "color", isText ? "text" : "bg")
                 classes.push(color);
                 break;
 
         }
-    } else if(node.fills.length > 1) {
+    } else if (node.fills.length > 1) {
         const css = (await node.getCSSAsync()).background;
         const className = `${name}_bg`;
         styles.push({ name: className, value: css });
