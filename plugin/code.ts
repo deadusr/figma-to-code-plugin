@@ -131,7 +131,7 @@ const updateCodeUI = async () => {
 
                 const value = variable.valuesByMode[collection.defaultModeId] as RGBA;
                 const hex = RGBAToHexA(value);
-                userColors.colors.set(hex, variable.name)
+                userColors.colors.set(hex, variable.name.replace(/\//g, '-'))
         }
     })
 
@@ -142,7 +142,7 @@ const updateCodeUI = async () => {
         if (style.paints.length === 1 && style.paints[0].type === 'SOLID') {
             const fill = style.paints[0];
             const hex = RGBAToHexA({ ...fill.color, a: fill.opacity ?? 1 });
-            userStyles.styles.set(hex, style.name);
+            userStyles.styles.set(hex, style.name.replace(/\//g, '-'));
         }
     });
 
@@ -159,7 +159,7 @@ const updateCodeUI = async () => {
 
     // @theme only includes colors actually used by the selected element
     data.css = uniqueColors.length > 0 ? `@theme {
-${uniqueColors.map(c => `--color-${c.name}:${c.value}`).join(';\n')}
+${uniqueColors.map(c => `--color-${c.name.replace(/\//g, '-')}:${c.value}`).join(';\n')}
 }
     ${data.css}` : data.css;
 

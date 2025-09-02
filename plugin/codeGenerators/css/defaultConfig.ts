@@ -73,6 +73,8 @@ const DefaultStyleConfig = {
         [32, "4xl"],
     ]),
     color: new Map([
+        ["#000000", "black"],
+        ["#ffffff", "white"],
         ["#fef2f2", "red-50"],
         ["#fee2e2", "red-100"],
         ["#fecaca", "red-200"],
@@ -108,9 +110,10 @@ export const valueToTailwindValue = (value: number | RGB | RGBA, name: Key, pref
             const opacity = 'a' in (value as RGBA) ? (value as RGBA).a : 1;
 
             const hex = RGBAToHexA(baseValue);
+            const defaultColor = DefaultStyleConfig.color.get(hex);
             const userColor = userColors.colors.get(hex);
             const userStyle = userStyles.styles.get(hex);
-            const color = userColor || userStyle || DefaultStyleConfig.color.get(hex);
+            const color = userColor || userStyle || defaultColor;
 
             const hasOpacity = opacity !== 1;
             const opacityModifier = hasOpacity ? `/${Math.round(opacity * 100)}` : '';
