@@ -44,7 +44,7 @@ const getBackgrounds = async (node: FrameNode | TextNode | ComponentNode | Insta
                 const gradientType = GRADIENT_CLASSES[fill.type];
                 classes.push(`${gradientType}-${rotationAngle}/srgb`)
 
-                const colorStops = fill.gradientStops.sort((prev, next) => prev.position - next.position) as readonly ColorStop[];
+                const colorStops = [...fill.gradientStops].sort((prev: ColorStop, next: ColorStop) => prev.position - next.position) as readonly ColorStop[];
 
                 const fromColorStop = colorStops[0];
                 const fromColor = valueToTailwindValue(fromColorStop.color, "color", 'from');

@@ -17,7 +17,7 @@ type Props = {
     lastChild?: boolean,
     name: string,
     tag: string,
-    containerRef: React.RefObject<HTMLDivElement>,
+    containerRef: React.RefObject<HTMLDivElement | null>,
     className?: string,
     onClick: () => void,
     onToggleExpand: () => void,

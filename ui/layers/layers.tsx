@@ -29,7 +29,7 @@ const Layers = () => {
     )
 }
 
-const LayersComponent = ({ containerRef }: { containerRef: React.RefObject<HTMLDivElement> }) => {
+const LayersComponent = ({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) => {
     const { children } = usePageChildrenStore();
     const store = usePageSelectionStore();
 
@@ -103,7 +103,7 @@ type LayerComponentProps = {
     onSelect: (id: string) => void,
     expanded: boolean,
     className?: string,
-    containerRef: React.RefObject<HTMLDivElement>
+    containerRef: React.RefObject<HTMLDivElement | null>
 }
 
 
