@@ -6,13 +6,14 @@
   "scripts": {
     "tsc": "npm run tsc:main && npm run tsc:ui",
     "tsc:main": "tsc --noEmit -p plugin",
-    "tsc:ui": "tsc --noEmit -p ui-src",
+    "tsc:ui": "tsc --noEmit -p ui",
     "tsc:watch": "concurrently -n widget,iframe \"npm run tsc:main -- --watch --preserveWatchOutput\" \"npm run tsc:ui -- --watch --preserveWatchOutput\"",
     "build": "npm run build:ui && npm run build:main -- --minify",
-    "build:main": "esbuild plugin/code.ts --bundle --target=es6 --outfile=dist/code.js",
+    "build:main": "esbuild plugin/code.ts --bundle --target=es6 --sourcemap=inline --outfile=dist/code.js",
     "build:ui": "npx vite build --minify esbuild --emptyOutDir=false",
     "build:watch": "concurrently -n widget,iframe \"npm run build:main -- --watch\" \"npm run build:ui -- --watch\"",
-    "dev": "concurrently -n tsc,build,vite 'npm:tsc:watch' 'npm:build:watch' 'vite'"
+    "dev": "concurrently -n tsc,build,vite 'npm:tsc:watch' 'npm:build:watch' 'vite'",
+    "generate:config": "node scripts/generate-tailwind-config.js"
   },
   "dependencies": {
     "lodash": "^4.17.21",
@@ -30,11 +31,13 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
     "concurrently": "^9.1.2",
+    "culori": "^4.0.2",
     "esbuild": "^0.25.4",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "typescript": "^5.9.3",
     "vite": "^6.3.5",
     "vite-plugin-singlefile": "^2.2.0"
   }
