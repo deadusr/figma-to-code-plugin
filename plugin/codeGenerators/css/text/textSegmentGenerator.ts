@@ -1,6 +1,7 @@
 import { concat } from "lodash"
 import { ColorInfo } from "../../tags/index"
 import { getColorsFromFills } from "../../../utils/colors"
+import { valueToTailwindValue } from "../defaultConfig"
 
 const UNTIS = {
     "PIXELS": "px",
@@ -66,23 +67,32 @@ type TextSegmentProps = {
 
 
 const generateStylesFromTextSegment = async (segment: TextSegmentProps, parent: TextNode) => {
-    const [colors, colorVariables] = await getColorsFromFills(segment.fills, parent as SceneNode, segment.fillStyleId);
+    const [, colorVariables] = await getColorsFromFills(segment.fills, parent as SceneNode, segment.fillStyleId);
 
     const fontName = `font-[${segment.fontName.family}] `;
     const fontStyle = segment.fontName.style.toLowerCase() !== "italic" ? "" : `italic `;
-    const fontSize = `text-[${segment.fontSize}px] `;
-    const fontWeight = `font-[${segment.fontWeight}] `;
-    const letterSpacing = `tracking-[${segment.letterSpacing.value} ${UNTIS[segment.letterSpacing.unit]}] `
-    const lineHeight = segment.lineHeight.unit === "AUTO" ? "" : `leading-[${segment.lineHeight.value} ${UNTIS[segment.lineHeight.unit]}] `
+    const fontSize = valueToTailwindValue(segment.fontSize, 'text', 'text') + ' ';
+    const fontWeight = valueToTailwindValue(segment.fontWeight, 'weight', 'font') + ' ';
+    const letterSpacing = `tracking-[${segment.letterSpacing.value}_${UNTIS[segment.letterSpacing.unit]}] `
+    const lineHeight = segment.lineHeight.unit === "AUTO" ? "" : `leading-[${segment.lineHeight.value}_${UNTIS[segment.lineHeight.unit]}] `
 
     const textCase = `${TEXT_TRANSFORM[segment.textCase]} `;
     const textDecoration = `${TEXT_DECORATION[segment.textDecoration]} `;
 
     const textDecorationColor = segment.textDecorationColor === null || segment.textDecorationColor.value === "AUTO" ? "" : `${segment.textDecorationColor.value} ` // TODO bound variables for textDecorationColor
     const textDecorationStyle = segment.textDecorationStyle === null ? "" : `${TEXT_DECORATION_STYLE[segment.textDecorationStyle]} `
-    const textDecorationThickness = segment.textDecorationThickness === null || segment.textDecorationThickness.unit === "AUTO" ? "" : `decoration-[${segment.textDecorationThickness.value} ${UNTIS[segment.textDecorationThickness.unit]}] `;
+    const textDecorationThickness = segment.textDecorationThickness === null || segment.textDecorationThickness.unit === "AUTO" ? "" : `decoration-[${segment.textDecorationThickness.value}_${UNTIS[segment.textDecorationThickness.unit]}] `;
 
-    const fontColor = concat(colorVariables.map(variable => `text-${variable.name} `), colors.map(color => `${color} `)).join('');
+    // Build font color: use valueToTailwindValue for solid fills (matches Tailwind palette),
+    // fall back to variable names for bound variables / styles
+    const fontColorParts: string[] = colorVariables.map(variable => `text-${variable.name}`);
+    const solidFills = (segment.fills as Paint[]).filter(f => f.type === "SOLID");
+    if (fontColorParts.length === 0 && solidFills.length > 0) {
+        const fill = solidFills[0];
+        const color = valueToTailwindValue({ ...fill.color, a: fill.opacity ?? 1 } as RGBA, 'color', 'text');
+        fontColorParts.push(color);
+    }
+    const fontColor = fontColorParts.join(' ') + ' ';
 
 
     let className = `${fontName}${fontStyle}${fontSize}${fontWeight}${letterSpacing}${lineHeight}${textCase}${textDecoration}${textDecorationColor}${textDecorationStyle}${textDecorationThickness}${fontColor}`;
