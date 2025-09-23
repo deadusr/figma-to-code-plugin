@@ -4,9 +4,11 @@
 
 A Figma plugin for automatic conversion of designs into clean HTML + Tailwind CSS code. Select elements on a Figma page and instantly get production-ready code with support for color palettes, images, and components.
 
-<!-- TODO: Add screenshots/GIFs of the plugin -->
-<!-- ![Main screen](screenshots/main.png) -->
-<!-- ![Code generation](screenshots/code-generation.gif) -->
+### Plugin Demo
+![Code Generation Demo](screenshots/demo.gif)
+
+### Rendered Result
+![Rendered Result](screenshots/result.gif)
 
 ---
 
@@ -25,20 +27,7 @@ A Figma plugin for automatic conversion of designs into clean HTML + Tailwind CS
 
 ---
 
-## Screenshots
 
-<!-- TODO: Replace placeholders with real screenshots -->
-
-> Screenshots will be added soon.
-
-| Description | Preview |
-|-------------|---------|
-| Layers panel | <!-- ![Layers](screenshots/layers.png) --> *Coming soon* |
-| Code generation | <!-- ![Code](screenshots/code.png) --> *Coming soon* |
-| Color palette | <!-- ![Colors](screenshots/colors.png) --> *Coming soon* |
-| Export | <!-- ![Export](screenshots/export.png) --> *Coming soon* |
-
----
 
 ## Installation & Setup
 
@@ -101,12 +90,6 @@ npm run build
 | UI Framework | React | 19.1 |
 | Styling | Tailwind CSS | 4.1 |
 | State Management | Zustand | 5.0 |
-| UI Bundler | Vite + vite-plugin-singlefile | 6.3 |
-| Plugin Bundler | esbuild | 0.25 |
-| Language | TypeScript | — |
-| Figma API | @figma/plugin-typings | 1.111 |
-| Utilities | lodash | 4.17 |
-| Linting | ESLint + eslint-plugin-react | 9.25 |
 
 ---
 
