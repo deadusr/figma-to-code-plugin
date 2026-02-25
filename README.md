@@ -1,6 +1,9 @@
 # FigmaToCodePlugin
 
-> **Status: In active development**
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)
+![React](https://img.shields.io/badge/React-19.1-61dafb.svg)
+![Figma](https://img.shields.io/badge/Figma-Plugin-ff7262.svg)
 
 A Figma plugin for automatic conversion of designs into clean HTML + Tailwind CSS code. Select elements on a Figma page and instantly get production-ready code with support for color palettes, images, and components.
 
@@ -39,8 +42,8 @@ A Figma plugin for automatic conversion of designs into clean HTML + Tailwind CS
 ### Install dependencies
 
 ```bash
-git clone https://github.com/deadusr/figma-plugin-site
-cd figma-plugin-site
+git clone https://github.com/deadusr/figma-to-code-plugin
+cd figma-to-code-plugin
 npm install
 ```
 
@@ -80,6 +83,29 @@ npm run build
 6. **Configure styles** — in the **Style configuration** section, connect a custom Tailwind palette from Figma Variables
 7. **Copy code** — use the copy button next to code blocks
 8. **Export** — in the **Export** section, select the desired options and download a ready-made package
+
+---
+
+## Architecture
+
+```
+Figma Canvas
+    │
+    ▼
+plugin/code.ts  ←──  Figma Plugin API (selection, traversal, export)
+    │
+    ├── codeGenerators/tags/     →  HTML tag resolution
+    ├── codeGenerators/css/      →  Tailwind class generation (layout, colors, typography)
+    └── codeGenerators/components/ → component detection
+    │
+    ▼
+UI (React + Zustand)
+    ├── Layers panel     — interactive tree with selection sync
+    ├── Code inspector   — generated HTML + CSS preview
+    └── Export panel      — download ready-made package
+```
+
+The plugin runs in two isolated contexts: the **Plugin sandbox** (`plugin/code.ts`) accesses the Figma document tree via the Plugin API, while the **UI iframe** (`ui/`) renders the interface with React. They communicate through `postMessage` with typed message contracts (`types/`).
 
 ---
 
